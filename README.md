@@ -1,4 +1,7 @@
-![](https://github.com/dissimilis/BookmarksManager/workflows/.NET%20Core/badge.svg)
+![](https://github.com/mkht/BookmarksManager/workflows/.NET%20Core/badge.svg)
+
+This repository is forked from [Dissimilis/BookmarksManager](https://github.com/Dissimilis/BookmarksManager).  
+It contains some bug fixes and minor changes.  
 
 BookmarksManager (simple .NET Standard lib for importing/exporting browser bookmarks)
 =============
