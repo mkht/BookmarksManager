@@ -13,13 +13,17 @@ namespace BookmarksManager
     /// </summary>
     public class NetscapeBookmarksWriter : BookmarksWriterBase<BookmarkFolder>
     {
-        protected string NetscapeBookmarksFileHead = @"<!DOCTYPE NETSCAPE-Bookmark-file-1>
-    <!--This is an automatically generated file.
-    It will be read and overwritten.
-    Do Not Edit! -->
-    <META HTTP-EQUIV=""Content-Type"" CONTENT=""text/html; charset={0}"">
-    <Title>Bookmarks</Title>
-    <H1>Bookmarks</H1>";
+        protected static readonly string[] HeaderArray = {
+            "<!DOCTYPE NETSCAPE-Bookmark-file-1>",
+            "<!-- This is an automatically generated file.",
+            "     It will be read and overwritten.",
+            "     DO NOT EDIT! -->",
+            "<META HTTP-EQUIV=\"Content-Type\" CONTENT=\"text/html; charset={0}\">",
+            "<TITLE>Bookmarks</TITLE>",
+            "<H1>Bookmarks</H1>"
+            };
+
+        protected string NetscapeBookmarksFileHead = String.Join(Environment.NewLine , HeaderArray);
 
         public const string Indentation = "    ";
         public static readonly string[] IgnoredAttributes = {"last_modified", "icon", "icon_uri", "href", "last_visit", "add_date", "feedurl"};
@@ -34,7 +38,7 @@ namespace BookmarksManager
         {
             if (outputTextWriter == null)
                 throw new ArgumentNullException(nameof(outputTextWriter));
-            outputTextWriter.Write(NetscapeBookmarksFileHead, OutputEncoding.WebName);
+            outputTextWriter.Write(NetscapeBookmarksFileHead, OutputEncoding.WebName.ToUpper());
             outputTextWriter.WriteLine();
             using (var writer = XmlWriter.Create(outputTextWriter, new XmlWriterSettings {ConformanceLevel = ConformanceLevel.Fragment, Indent = false, Encoding = OutputEncoding}))
             {
@@ -52,7 +56,7 @@ namespace BookmarksManager
                 BookmarkLink innerLink;
                 if ((innerFolder = item as BookmarkFolder) != null)
                 {
-                    WriteIndentation(iteration, writer);
+                    WriteIndentation(iteration + 1, writer);
                     WriteFolderLine(innerFolder, writer, xmlWriter);
                     WriteFolderItems(innerFolder, writer, xmlWriter, iteration + 1);
                 }
@@ -68,14 +72,16 @@ namespace BookmarksManager
 
         protected virtual void WriteLinkLine(BookmarkLink link, TextWriter writer, XmlWriter xmlWriter)
         {
+            WriteIndentation(1, writer);
             writer.Write("<DT>");
             xmlWriter.WriteStartElement("A");
+            xmlWriter.WriteAttributeString("HREF", link.Url);
+            if (link.Added.HasValue)
+                xmlWriter.WriteAttributeString("ADD_DATE", link.Added.Value.ToUnixTimestamp().ToString());
             if (link.LastModified.HasValue)
                 xmlWriter.WriteAttributeString("LAST_MODIFIED", link.LastModified.Value.ToUnixTimestamp().ToString());
             if (link.LastVisit.HasValue)
                 xmlWriter.WriteAttributeString("LAST_VISIT", link.LastVisit.Value.ToUnixTimestamp().ToString());
-            if (link.Added.HasValue)
-                xmlWriter.WriteAttributeString("ADD_DATE", link.Added.Value.ToUnixTimestamp().ToString());
             if (!string.IsNullOrEmpty(link.IconUrl))
                 xmlWriter.WriteAttributeString("ICON_URI", link.IconUrl);
             if (!string.IsNullOrEmpty(link.IconContentType) && link.IconData != null)
@@ -85,7 +91,6 @@ namespace BookmarksManager
                 xmlWriter.WriteAttributeString("FEED", "true");
                 xmlWriter.WriteAttributeString("FEEDURL", link.FeedUrl);
             }
-            xmlWriter.WriteAttributeString("HREF", link.Url);
             if (link.Attributes != null && link.Attributes.Any())
                 WriteCustomAttributes(link.Attributes, xmlWriter);
 
@@ -113,10 +118,10 @@ namespace BookmarksManager
         {
             writer.Write("<DT>");
             xmlWriter.WriteStartElement("H3");
-            if (folder.LastModified.HasValue)
-                xmlWriter.WriteAttributeString("LAST_MODIFIED", folder.LastModified.Value.ToUnixTimestamp().ToString());
             if (folder.Added.HasValue)
                 xmlWriter.WriteAttributeString("ADD_DATE", folder.Added.Value.ToUnixTimestamp().ToString());
+            if (folder.LastModified.HasValue)
+                xmlWriter.WriteAttributeString("LAST_MODIFIED", folder.LastModified.Value.ToUnixTimestamp().ToString());
             if (folder.Attributes != null && folder.Attributes.Any())
                 WriteCustomAttributes(folder.Attributes, xmlWriter);
             xmlWriter.WriteString(folder.Title);
