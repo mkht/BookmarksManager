@@ -13,8 +13,7 @@ namespace BookmarksManager
         {
             if (!unixTimeStamp.HasValue || unixTimeStamp < 1)
                 return null;
-            unixTimeStamp = takeNDigits(unixTimeStamp.Value, 10);
-            return new DateTime(1970, 1, 1, 0, 0, 0, 0, DateTimeKind.Utc).AddSeconds((double)unixTimeStamp);
+            return DateTimeOffset.FromUnixTimeSeconds(unixTimeStamp.Value).UtcDateTime;
         }
 
         public static DateTime? FromUnixTimeStamp(string unixTimeStamp)
