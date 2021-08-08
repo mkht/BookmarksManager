@@ -13,7 +13,8 @@ namespace BookmarksManager
         {
             if (!unixTimeStamp.HasValue || unixTimeStamp < 1)
                 return null;
-            return DateTimeOffset.FromUnixTimeSeconds(unixTimeStamp.Value).UtcDateTime;
+            unixTimeStamp = takeNDigits(unixTimeStamp.Value, 10);
+            return DateTimeOffset.FromUnixTimeSeconds((long)unixTimeStamp).UtcDateTime;
         }
 
         public static DateTime? FromUnixTimeStamp(string unixTimeStamp)
@@ -31,7 +32,7 @@ namespace BookmarksManager
                 return number;
             int numberOfDigits = (int)Math.Floor(Math.Log10(number) + 1);
             if (numberOfDigits >= n)
-                return (int)Math.Truncate((number / Math.Pow(10, numberOfDigits - n)));
+                return (long)Math.Truncate((number / Math.Pow(10, numberOfDigits - n)));
             else
                 return number;
         }
