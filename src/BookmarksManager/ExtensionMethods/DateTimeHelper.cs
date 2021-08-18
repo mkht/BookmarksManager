@@ -6,7 +6,15 @@ namespace BookmarksManager
     {
         public static long ToUnixTimestamp(this DateTime time)
         {
-            return (long)((DateTimeOffset)time).ToUnixTimeSeconds();
+            try
+            {
+                return (long)((DateTimeOffset)time).ToUnixTimeSeconds();
+            }
+            catch (ArgumentOutOfRangeException)
+            {
+                DateTime UnixEpoch = new DateTime(1970, 1, 1, 0, 0, 0, DateTimeKind.Utc);
+                return (long)(time > UnixEpoch ? DateTimeOffset.MaxValue.ToUnixTimeSeconds() : DateTimeOffset.MinValue.ToUnixTimeSeconds());
+            }
         }
 
         public static DateTime? FromUnixTimeStamp(long? unixTimeStamp)
