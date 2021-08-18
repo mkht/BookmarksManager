@@ -11,7 +11,7 @@ namespace BookmarksManager
 
         public static DateTime? FromUnixTimeStamp(long? unixTimeStamp)
         {
-            if (!unixTimeStamp.HasValue || unixTimeStamp < 1)
+            if (!unixTimeStamp.HasValue || unixTimeStamp < 0)
                 return null;
             unixTimeStamp = takeNDigits(unixTimeStamp.Value, 10);
             return DateTimeOffset.FromUnixTimeSeconds((long)unixTimeStamp).UtcDateTime;
